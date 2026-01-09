@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package test_basic;
+
+service BasicService {
+  rpc BasicMethod(BasicRequest) returns (BasicResponse) {
+  }
+}
+
+message BasicRequest {
+  int32 id = 1;
+  string name = 2;
+}
+
+message BasicResponse {
+  bool success = 1;
+  string message = 2;
+}

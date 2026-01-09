@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package test_complex;
+
+enum Priority {
+  LOW = 0;
+  MEDIUM = 1;
+  HIGH = 2;
+  CRITICAL = 3;
+}
+
+service ComplexService {
+  rpc ProcessComplex(ComplexRequest) returns (ComplexResponse) {
+  }
+}
+
+message ComplexRequest {
+  int32 id = 1;
+  string name = 2;
+  Priority priority = 3;
+  
+  // 嵌套消息
+  SubTask sub_task = 4;
+  
+  // 重复字段
+  repeated string tags = 5;
+  repeated SubTask sub_tasks = 6;
+  repeated Priority priorities = 7;
+  
+  // 映射字段
+  map<string, int32> metadata = 8;
+  map<string, SubTask> named_sub_tasks = 9;
+  map<int32, Priority> priority_map = 10;
+  
+  message SubTask {
+    string description = 1;
+    bool completed = 2;
+    Priority priority = 3;
+  }
+}
+
+message ComplexResponse {
+  bool success = 1;
+  string message = 2;
+  ComplexRequest.SubTask result = 3;
+  repeated ComplexRequest.SubTask results = 4;
+  map<string, ComplexRequest.SubTask> result_map = 5;
+}

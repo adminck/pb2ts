@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package test_enum;
+
+enum StatusEnum {
+  UNKNOWN_STATUS = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  PENDING = 3;
+}
+
+service EnumService {
+  rpc ProcessStatus(EnumRequest) returns (EnumResponse) {
+  }
+}
+
+message EnumRequest {
+  StatusEnum status = 1;
+  repeated StatusEnum statuses = 2;
+}
+
+message EnumResponse {
+  StatusEnum result = 1;
+  map<string, StatusEnum> status_map = 2;
+}

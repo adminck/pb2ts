@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package test_nested;
+
+service NestedService {
+  rpc ProcessNested(NestedRequest) returns (NestedResponse) {
+  }
+}
+
+message NestedRequest {
+  int32 id = 1;
+  UserInfo user = 2;
+  repeated Address addresses = 3;
+  map<string, ContactInfo> contacts = 4;
+  
+  message UserInfo {
+    string name = 1;
+    int32 age = 2;
+  }
+  
+  message Address {
+    string street = 1;
+    string city = 2;
+    string country = 3;
+  }
+  
+  message ContactInfo {
+    string email = 1;
+    string phone = 2;
+  }
+}
+
+message NestedResponse {
+  bool processed = 1;
+  NestedRequest.UserInfo user_info = 2;  // 测试嵌套消息引用
+  NestedRequest.Address primary_address = 3;
+}
