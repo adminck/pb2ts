@@ -17,13 +17,15 @@ import (
 
 // Parser 用于解析 Protocol Buffer 文件的主解析器
 type Parser struct {
-	importPaths []string
+	importPaths  []string
+	excludePaths map[string]string
 }
 
 // NewParser 创建一个新的解析器
-func NewParser(importPaths []string) (*Parser, error) {
+func NewParser(importPaths []string, excludePaths []string) (*Parser, error) {
 	p := &Parser{
-		importPaths: make([]string, 0),
+		importPaths:  make([]string, 0),
+		excludePaths: make(map[string]string),
 	}
 	for _, path := range importPaths {
 		aPath, err := abs(path)
@@ -31,6 +33,13 @@ func NewParser(importPaths []string) (*Parser, error) {
 			return nil, err
 		}
 		p.importPaths = append(p.importPaths, aPath)
+	}
+	for _, path := range excludePaths {
+		aPath, err := abs(path)
+		if err != nil {
+			return nil, err
+		}
+		p.excludePaths[aPath] = aPath
 	}
 	return p, nil
 }
@@ -47,7 +56,7 @@ func (p *Parser) ParseServices(protoPath string) ([]*types.Service, error) {
 		ImportPaths:           append(p.importPaths, dir),
 	}
 
-	files, err := listProtoFiles(protoPath)
+	files, err := listProtoFiles(protoPath, p.excludePaths)
 	if err != nil {
 		return nil, fmt.Errorf("列出 proto 文件失败: %w", err)
 	}
@@ -290,7 +299,7 @@ func (p *Parser) ParseEnum(enum *desc.EnumDescriptor, parentName string, isNeste
 }
 
 // listProtoFiles 列出指定目录中的所有 proto 文件
-func listProtoFiles(dir string) ([]string, error) {
+func listProtoFiles(dir string, excludePaths map[string]string) ([]string, error) {
 	var files []string
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -298,6 +307,16 @@ func listProtoFiles(dir string) ([]string, error) {
 	}
 
 	for _, entry := range entries {
+		entryPath, err := filepath.Abs(filepath.Join(dir, entry.Name()))
+		if err != nil {
+			return nil, err
+		}
+
+		// 检查是否是排除路径
+		if _, ok := excludePaths[entryPath]; ok {
+			continue
+		}
+
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".proto") {
 			files = append(files, entry.Name())
 		}

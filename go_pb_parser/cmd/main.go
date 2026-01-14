@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/adminck/pb2ts/internal/parser"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/adminck/pb2ts/internal/parser"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ var (
 func main() {
 	var protoPath string
 	var importPaths string
+	var excludePaths string
 	var showVersion bool
 
 	rootCmd := &cobra.Command{
@@ -37,12 +39,13 @@ func main() {
 				protoPath = args[0]
 			}
 
-			return runParser(protoPath, importPaths)
+			return runParser(protoPath, importPaths, excludePaths)
 		},
 	}
 
 	rootCmd.Flags().StringVar(&protoPath, "proto", "", "Proto 文件目录路径")
 	rootCmd.Flags().StringVar(&importPaths, "imports", "", "导入路径，多个路径用逗号分隔")
+	rootCmd.Flags().StringVar(&excludePaths, "exclude", "", "排除路径，多个路径用逗号分隔")
 	rootCmd.Flags().BoolVar(&showVersion, "version", false, "显示版本信息")
 
 	// 添加帮助信息
@@ -82,7 +85,7 @@ func processImportPaths(importPaths string) []string {
 	return append(imports, fmt.Sprintf("%s/third_party", programDir))
 }
 
-func runParser(protoPath string, importPaths string) error {
+func runParser(protoPath string, importPaths string, excludePaths string) error {
 	if protoPath == "" {
 		return fmt.Errorf("必须指定 proto 文件路径")
 	}
@@ -91,7 +94,8 @@ func runParser(protoPath string, importPaths string) error {
 	imports := processImportPaths(importPaths)
 
 	// 创建解析器
-	p, err := parser.NewParser(imports)
+	excludePathsList := strings.Split(excludePaths, ",")
+	p, err := parser.NewParser(imports, excludePathsList)
 	if err != nil {
 		return fmt.Errorf("创建解析器失败: %w", err)
 	}

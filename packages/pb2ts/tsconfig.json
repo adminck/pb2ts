@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "compilerOptions": {
+    /* ================================
+     * 基础目标
+     * ================================ */
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    /* ================================
+     * Node.js 运行环境
+     * ================================ */
+    "lib": ["ES2020"],
+    "types": ["node"],
+
+    /* ================================
+     * 类型输出（由 tsup 实际 emit）
+     * ================================ */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "dist",
+
+    /* ================================
+     * 严格性与稳定性
+     * ================================ */
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* ================================
+     * 互操作能力
+     * ================================ */
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    /* ================================
+     * 构建职责分离
+     * ================================ */
+    "noEmit": true
+  },
+
+  "include": [
+    "src/**/*"
+  ],
+
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

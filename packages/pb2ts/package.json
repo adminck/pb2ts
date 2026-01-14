@@ -1,0 +1,43 @@
+{
+  "name": "pb2ts",
+  "version": "0.1.0",
+  "description": "Generate TypeScript HTTP clients from protobuf with google.api.http",
+  "author": "your-name",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "pb2ts": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build",
+    "test:gen": "node ./dist/cli/index.js gen --proto ../../test/test_proto --out ../../test/api"
+  },
+  "dependencies": {
+    "cac": "^6.7.14",
+    "fs-extra": "^11.2.0",
+    "jiti": "^1.21.0",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.11.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

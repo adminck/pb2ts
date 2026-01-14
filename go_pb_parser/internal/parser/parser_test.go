@@ -6,6 +6,8 @@ func TestParser(t *testing.T) {
 
 	parser, err := NewParser([]string{
 		"../../../bin/third_party",
+	}, []string{
+		"../../test_proto/exclude",
 	})
 	if err != nil {
 		t.Fatalf("NewParser() error = %v", err)
