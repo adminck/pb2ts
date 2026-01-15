@@ -8,7 +8,7 @@ export interface ProtoConfig {
     root: string
     /**
      * Glob patterns to include
-     * @default ["**\/*.proto"]
+     * @default []
      */
     include: string[]
     /**
@@ -25,10 +25,19 @@ export type GenerationType = 'service' | 'function'
 export interface OutputConfig {
     /**
      * Output directory
-     * @default "src/api"
+     * @default "api"
      */
     dir: string
+    /**
+     * Additional import statements to include in generated files
+     * @default []
+     */
     imports? : string[]
+    /**
+     * Custom function calls for specific RPC methods
+     * Allows overriding the default template for individual methods
+     * @default {}
+     */
     funcCalls? : {
         [key: string]: funcCall
     }
@@ -41,14 +50,30 @@ export interface OutputConfig {
      * Template for service class generation
      */
     serviceTemplate?: {
+        /**
+         * Wrapper function for the entire service class
+         * Takes the service name and generated methods code as parameters
+         */
         classWrapper?: (serviceName: string, methodsCode: string) => string
+        /**
+         * Wrapper function for individual service methods
+         * Defines how each RPC method is generated within the service class
+         */
         methodWrapper?: funcCall
+        /**
+         * Template for the extension file that users can customize
+         * This file won't be overwritten on regeneration
+         */
         extensionWrapper?: (serviceName: string) => string
     }
     /**
      * Template for function generation
      */
     functionTemplate?: {
+        /**
+         * Wrapper function for individual functions when using function generation mode
+         * Defines how each RPC method is generated as a standalone function
+         */
         functionWrapper?: funcCall
     }
 }

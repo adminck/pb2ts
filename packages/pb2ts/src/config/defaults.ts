@@ -8,8 +8,8 @@ export const defaultConfig: Pb2tsConfig = {
         exclude: ['node_modules', 'dist'],
     },
     output: {
-        dir: 'src/api',
-        imports: [`import { fetch } from "fetch"`],
+        dir: './api',
+        imports: [],
         generationType: 'service', // 默认使用服务类方式
         serviceTemplate: {
             classWrapper: defaultServiceClassWrapper,

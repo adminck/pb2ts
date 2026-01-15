@@ -234,7 +234,7 @@ var ProtoToTsGenerator = class {
     let baseType;
     if (field.isMap) {
       const keyType = this.mapProtoTypeToTs(field.mapKey);
-      const valueType = this.mapProtoTypeToTs(field.mapValue);
+      const valueType = field.mapValue ? this.mapProtoTypeToTs(field.mapValue) : "any";
       baseType = `Record<${keyType}, ${valueType}>`;
     } else if (field.typeName) {
       baseType = field.typeName;
@@ -274,8 +274,8 @@ var ProtoToTsGenerator = class {
    */
   initializeCustomFile(service, serviceDir) {
     const customFilePath = path3.join(serviceDir, `${service.name}.extensions.ts`);
-    if (!fs2.existsSync(customFilePath)) {
-      const templateFn = this.config.output.serviceTemplate?.extensionWrapper;
+    if (!fs2.existsSync(customFilePath) && this.config.output.serviceTemplate?.extensionWrapper) {
+      const templateFn = this.config.output.serviceTemplate.extensionWrapper;
       const template = templateFn(service.name);
       writeFile(customFilePath, template);
     }

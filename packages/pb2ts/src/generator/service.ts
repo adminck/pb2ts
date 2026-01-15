@@ -215,7 +215,7 @@ export class ProtoToTsGenerator {
         if (field.isMap) {
             // Map 类型
             const keyType = this.mapProtoTypeToTs(field.mapKey);
-            const valueType = this.mapProtoTypeToTs(field.mapValue);
+            const valueType = field.mapValue ? this.mapProtoTypeToTs(field.mapValue) : 'any';
             baseType = `Record<${keyType}, ${valueType}>`;
         } else if (field.typeName) {
             // 自定义类型（Message 或 Enum）
@@ -264,9 +264,9 @@ export class ProtoToTsGenerator {
      */
     private initializeCustomFile(service: Service,serviceDir:string): void {
         const customFilePath = path.join(serviceDir, `${service.name}.extensions.ts`);
-        // 只在文件不存在时创建
-        if (!fs.existsSync(customFilePath)) {
-            const templateFn = this.config.output.serviceTemplate?.extensionWrapper!;
+        // 只在文件不存在且模板函数存在时创建
+        if (!fs.existsSync(customFilePath) && this.config.output.serviceTemplate?.extensionWrapper) {
+            const templateFn = this.config.output.serviceTemplate.extensionWrapper;
             const template = templateFn(service.name);
             writeFile(customFilePath, template);
         }
