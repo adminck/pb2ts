@@ -23,7 +23,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build",
-    "test:gen": "node ./dist/cli/index.js gen --proto ../../test/test_proto --out ../../test/api"
+    "test:gen": "node ./dist/cli/index.js gen --proto ../../test/test_proto --out ./test/api"
   },
   "dependencies": {
     "cac": "^6.7.14",

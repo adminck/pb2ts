@@ -98,10 +98,10 @@ function defaultExtensionWrapper(serviceName) {
  * User custom extensions for ${serviceName}
  * 
  * This file is for your custom code and will NOT be overwritten.
- * Import generated types from: ../${serviceName}/${serviceName}.types
+ * Import generated types from: ./${serviceName}.types
  */
 
-import { ${serviceName}Service, Types } from '../generated/${serviceName}/${serviceName}.index';
+import { ${serviceName}Service, Types } from './${serviceName}.index';
 
 // Example: Extend the generated service
 export class ${serviceName}ServiceExtended extends ${serviceName}Service {
@@ -369,8 +369,7 @@ var ProtoToTsGenerator = class {
    * 为单个服务生成代码
    */
   generateService(service) {
-    const outputDir = path4.join(this.config.output.dir, "generated");
-    const serviceDir = path4.join(outputDir, service.name);
+    const serviceDir = path4.join(this.config.output.dir, service.name);
     ensureDir(serviceDir);
     const typesContent = this.generateTypes(service);
     writeFile(
@@ -463,21 +462,21 @@ var ProtoToTsGenerator = class {
    */
   mapProtoTypeToTs(protoType) {
     const typeMap = {
-      "int32": "number",
-      "int64": "number",
-      "uint32": "number",
-      "uint64": "number",
-      "sint32": "number",
-      "sint64": "number",
-      "fixed32": "number",
-      "fixed64": "number",
-      "sfixed32": "number",
-      "sfixed64": "number",
-      "float": "number",
-      "double": "number",
-      "bool": "boolean",
-      "string": "string",
-      "bytes": "Uint8Array"
+      "TYPE_DOUBLE": "number",
+      "TYPE_FLOAT": "number",
+      "TYPE_INT64": "string",
+      "TYPE_UINT64": "string",
+      "TYPE_INT32": "number",
+      "TYPE_FIXED64": "string",
+      "TYPE_FIXED32": "number",
+      "TYPE_BOOL": "boolean",
+      "TYPE_STRING": "string",
+      "TYPE_BYTES": "Uint8Array",
+      "TYPE_UINT32": "number",
+      "TYPE_SFIXED32": "number",
+      "TYPE_SFIXED64": "string",
+      "TYPE_SINT32": "number",
+      "TYPE_SINT64": "string"
     };
     return typeMap[protoType] || protoType;
   }

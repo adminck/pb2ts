@@ -237,22 +237,23 @@ export class ProtoToTsGenerator {
      * Proto 类型到 TS 类型映射
      */
     private mapProtoTypeToTs(protoType: string): string {
+        // 将 descriptor.proto 中定义的类型枚举映射到 TypeScript 类型
         const typeMap: Record<string, string> = {
-            'int32': 'number',
-            'int64': 'number',
-            'uint32': 'number',
-            'uint64': 'number',
-            'sint32': 'number',
-            'sint64': 'number',
-            'fixed32': 'number',
-            'fixed64': 'number',
-            'sfixed32': 'number',
-            'sfixed64': 'number',
-            'float': 'number',
-            'double': 'number',
-            'bool': 'boolean',
-            'string': 'string',
-            'bytes': 'Uint8Array',
+            'TYPE_DOUBLE': 'number',
+            'TYPE_FLOAT': 'number',
+            'TYPE_INT64': 'string',
+            'TYPE_UINT64': 'string',
+            'TYPE_INT32': 'number',
+            'TYPE_FIXED64': 'string',
+            'TYPE_FIXED32': 'number',
+            'TYPE_BOOL': 'boolean',
+            'TYPE_STRING': 'string',
+            'TYPE_BYTES': 'Uint8Array',
+            'TYPE_UINT32': 'number',
+            'TYPE_SFIXED32': 'number',
+            'TYPE_SFIXED64': 'string',
+            'TYPE_SINT32': 'number',
+            'TYPE_SINT64': 'string',
         };
 
         return typeMap[protoType] || protoType;
