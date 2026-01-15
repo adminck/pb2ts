@@ -20,20 +20,36 @@ export interface ProtoConfig {
 
 type funcCall = (name: RPC) => string
 
+export type GenerationType = 'service' | 'function'
+
 export interface OutputConfig {
     /**
      * Output directory
      * @default "src/api"
      */
     dir: string
-    /**
-     * HTTP client to generate
-     * @default "fetch"
-     */
     imports? : string[]
-    defaultFuncTemplate? : funcCall
     funcCalls? : {
         [key: string]: funcCall
+    }
+    /**
+     * Generation type: whether to generate service classes or pure functions
+     * @default "service"
+     */
+    generationType?: GenerationType
+    /**
+     * Template for service class generation
+     */
+    serviceTemplate?: {
+        classWrapper?: (serviceName: string, methodsCode: string) => string
+        methodWrapper?: funcCall
+        extensionWrapper?: (serviceName: string) => string
+    }
+    /**
+     * Template for function generation
+     */
+    functionTemplate?: {
+        functionWrapper?: funcCall
     }
 }
 

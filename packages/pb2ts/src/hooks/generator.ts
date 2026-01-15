@@ -4,7 +4,7 @@ import { runParser } from '../parser/runParser'
 
 export async function useGenerator(cwd: string = process.cwd(), overrides?: Partial<Pb2tsConfig>) {
     const config = loadConfig(cwd, { overrides })
-    const services = await runParser(config.proto.root)
+    const services = await runParser(config)
 
     return {
         config,

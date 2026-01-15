@@ -57,6 +57,9 @@ export function loadConfig(
         options.overrides,
     )
 
+    // 确保模板函数有值
+    ensureTemplateFunctions(merged)
+
     validateConfig(merged)
 
     return freezeConfig(merged)
@@ -124,4 +127,27 @@ function freezeConfig<T>(config: T): T {
     }
 
     return config
+}
+
+/**
+ * 确保配置中的模板函数有值，否则抛出错误
+ */
+function ensureTemplateFunctions(config: Pb2tsConfig): void {
+    if (config.output.generationType === 'function') {
+        // 对于函数模式，确保函数模板存在
+        if (!config.output.functionTemplate?.functionWrapper) {
+            throw new Error('Function generation mode requires output.functionTemplate.functionWrapper to be defined')
+        }
+    } else {
+        // 对于服务类模式（默认），确保服务模板存在
+        if (!config.output.serviceTemplate?.classWrapper) {
+            throw new Error('Service generation mode requires output.serviceTemplate.classWrapper to be defined')
+        }
+        if (!config.output.serviceTemplate?.methodWrapper) {
+            throw new Error('Service generation mode requires output.serviceTemplate.methodWrapper to be defined')
+        }
+        if (!config.output.serviceTemplate?.extensionWrapper) {
+            throw new Error('Service generation mode requires output.serviceTemplate.extensionWrapper to be defined')
+        }
+    }
 }
