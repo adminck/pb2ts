@@ -1,0 +1,42 @@
+# 源代码
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+tsup.config.ts
+
+# 测试
+test/
+*.test.ts
+*.spec.ts
+
+# 开发依赖
+node_modules/
+.pnpm-store/
+
+# 文档
+README.md
+CHANGELOG.md
+*.md
+
+# 开发脚本
+scripts/build-*.js
+
+# 保留 postinstall.js
+!scripts/postinstall.js
+
+# 临时文件
+*.log
+.DS_Store
+*.tmp
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore

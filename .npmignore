@@ -1,0 +1,42 @@
+# 开发文件
+.git
+.gitignore
+.github
+.pnpm-workspace.yaml
+
+# 测试文件
+test/
+go_pb_parser/test_proto/
+
+# 文档
+*.md
+!PUBLISH.md
+
+# CI/CD
+.github/
+
+# 开发脚本
+scripts/build-go.js
+scripts/build-all-platforms.js
+scripts/prepare-publish.js
+
+# Go 源代码（不包含在发布包中）
+go_pb_parser/
+
+# 临时文件
+*.log
+.DS_Store
+*.tmp
+
+# node_modules
+node_modules/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 构建产物（只保留 dist）
+!packages/pb2ts/dist

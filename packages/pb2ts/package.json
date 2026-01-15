@@ -1,9 +1,9 @@
 {
-  "name": "pb2ts",
+  "name": "@adminck/pb2ts",
   "version": "0.1.0",
   "description": "Generate TypeScript HTTP clients from protobuf with google.api.http",
-  "author": "your-name",
-  "license": "MIT",
+  "author": "adminck <adminck@example.com>",
+  "license": "MulanPSL2",
   "type": "module",
   "bin": {
     "pb2ts": "./dist/cli/index.js"
@@ -16,13 +16,18 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "scripts"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "npm run build",
+    "build:parser": "node ../../scripts/build-go.js",
+    "build:parser:all": "node ../../scripts/build-all-platforms.js",
+    "prepare:publish": "node ../../scripts/prepare-publish.js",
+    "prepublishOnly": "npm run build && npm run build:parser:all && npm run prepare:publish",
+    "postinstall": "node scripts/postinstall.js",
     "test:gen": "node ./dist/cli/index.js gen --proto ../../test/test_proto --out ./test/api"
   },
   "dependencies": {
@@ -39,5 +44,23 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "keywords": [
+    "protobuf",
+    "typescript",
+    "grpc",
+    "http",
+    "code-generator",
+    "api-client",
+    "restful",
+    "proto3"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adminck/pb2ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adminck/pb2ts/issues"
+  },
+  "homepage": "https://github.com/adminck/pb2ts#readme"
 }
