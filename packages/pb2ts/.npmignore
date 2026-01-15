@@ -15,9 +15,10 @@ node_modules/
 .pnpm-store/
 
 # 文档
-README.md
 CHANGELOG.md
 *.md
+!README.md
+!README_EN.md
 
 # 开发脚本
 scripts/build-*.js

@@ -1,104 +1,171 @@
+---
+English | **[中文](./README.md)**
+---
+
 # pb2ts
 
-`pb2ts` is a powerful tool that converts Protocol Buffer (protobuf) definition files into TypeScript HTTP client code. It's especially suitable for gRPC services that use `google.api.http` annotations to define RESTful APIs.
+**Automatically convert Protocol Buffer definitions to TypeScript HTTP client code**
 
-## Features
+pb2ts is a powerful code generation tool that converts `.proto` files to type-safe TypeScript HTTP client code. It provides excellent support for `google.api.http` annotations and can automatically generate RESTful API client code, helping you eliminate the tedious work of manually writing API call code.
 
-- **Automatic Code Generation**: Convert `.proto` files into TypeScript client code automatically
-- **HTTP Annotation Support**: Parse `google.api.http` annotations to generate corresponding HTTP request code
-- **Type Safety**: Generated TypeScript code includes complete type definitions
-- **Dual Modes**: Choose between generating service classes or pure functions
-- **Highly Configurable**: Supports custom templates and output options
-- **Support for Nested Messages and Enums**: Fully handles complex protobuf structures
-- **Complete Protobuf Type Mapping**: Supports basic types, messages, enums, Map types, and repeated fields
-- **Comment Preservation**: Preserves comment information from original proto files
-- **Go Language Parser**: Uses high-performance Go language parser to process proto files
+## Core Features
 
-## Installation
+- **Zero Configuration**: Ready to use out of the box, no complex configuration needed to quickly generate code
+- **Type Safety**: Generated code includes complete TypeScript type definitions, catching errors at compile time
+- **Dual Generation Modes**: Supports both Service classes and pure Functions code styles
+- **Highly Customizable**: Completely control generated code structure through templates, compatible with fetch, axios, and various HTTP libraries
+- **Full Feature Support**: Supports all common Proto features including message nesting, enums, Maps, Repeated fields, etc.
+- **Comment Preservation**: Automatically preserves comment information from proto files
+- **Cross-Platform Support**: Built-in support for Windows, macOS, Linux, and other platforms
+
+## Quick Start
+
+### Installation
 
 ```bash
 npm install pb2ts
 ```
 
-## Quick Start
+### Step 1: Write Proto File
 
-### 1. Basic Usage
+Create a `.proto` file, for example `user.proto`:
+
+```protobuf
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package user;
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (google.api.http) = {
+      get: "/v1/users/{user_id}"
+    };
+  }
+
+  rpc CreateUser(CreateUserRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/v1/users"
+    };
+  }
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+}
+```
+
+### Step 2: Generate TypeScript Code
+
+Run in project root directory:
 
 ```bash
-# Use CLI to generate TypeScript code
 npx pb2ts gen --proto ./proto --out ./src/api
 ```
 
-### 2. Configuration File
+This will automatically generate the following files:
 
-Create a `pb2ts.config.ts` configuration file:
+```
+src/api/
+├── UserService/
+│   ├── UserService.types.ts      # Type definitions (overwritten on each generation)
+│   ├── UserService.index.ts      # Client implementation (overwritten on each generation)
+│   └── UserService.extensions.ts # Extension file (created only on first generation, customizable)
+```
 
-**Note**: The default configuration uses the native `fetch` API. To use `axios` or other HTTP libraries, you need to customize the `methodWrapper`.
+### Step 3: Use Generated Code
 
-```ts
+```typescript
+import { UserServiceService, Types } from './src/api/UserService/UserService.index'
+
+// Create service instance
+const userService = new UserServiceService('https://api.example.com')
+
+// Call API
+async function main() {
+  // Get user
+  const user = await userService.GetUser({ user_id: '123' })
+  console.log(user.name)
+
+  // Create user
+  const newUser = await userService.CreateUser({
+    name: 'John Doe',
+    email: 'john@example.com'
+  })
+  console.log(newUser.id)
+}
+
+main()
+```
+
+## Configuration File
+
+Creating a `pb2ts.config.ts` configuration file allows more flexible control over generation behavior:
+
+```typescript
 import { defineConfig } from 'pb2ts'
 
 export default defineConfig({
   proto: {
-    root: './',
-    include: [],
-    exclude: ['node_modules', 'dist']
+    root: './proto',           // Proto file root directory
+    include: ['**/*.proto'],   // File patterns to include
+    exclude: ['node_modules']  // File patterns to exclude
   },
   output: {
-    dir: './api',
-    generationType: 'service', // 'service' or 'function'
-    // Default uses fetch, configure serviceTemplate.methodWrapper to use axios
-    serviceTemplate: {
-      classWrapper: (serviceName, methodsCode) => `
-class ${serviceName}Service {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = '') {
-    this.baseUrl = baseUrl;
-  }
-
-${methodsCode}
-}`,
-      methodWrapper: (rpc) => `
-  async ${rpc.name}(request: Types.${rpc.request}): Promise<Types.${rpc.resp}> {
-    const response = await fetch(\`\${this.baseUrl}${rpc.path}\`, {
-      method: '${rpc.method.toUpperCase()}',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-      throw new Error(\`${rpc.name} failed: \${response.statusText}\`);
-    }
-
-    return response.json();
-  }`
-    }
+    dir: './src/api',          // Output directory
+    generationType: 'service' // Generation mode: 'service' or 'function'
   }
 })
 ```
 
-**Example using axios**:
+## Using Different HTTP Libraries
 
-```ts
+### Default using fetch (Ready to use)
+
+```typescript
+export default defineConfig({
+  proto: {
+    root: './proto',
+  },
+  output: {
+    dir: './src/api',
+  }
+})
+```
+
+Generated code uses native `fetch` API, no additional dependencies required.
+
+### Using axios
+
+```typescript
 import { defineConfig } from 'pb2ts'
 
 export default defineConfig({
   proto: {
-    root: './',
-    include: [],
-    exclude: ['node_modules', 'dist']
+    root: './proto',
   },
   output: {
-    dir: './api',
+    dir: './src/api',
     imports: [
-      'import axios from \'axios\'',
-      'import type { AxiosResponse } from \'axios\''
+      "import axios from 'axios'",
+      "import type { AxiosInstance } from 'axios'"
     ],
     serviceTemplate: {
       classWrapper: (serviceName, methodsCode) => `
 class ${serviceName}Service {
-  private axiosInstance: any;
+  private axiosInstance: AxiosInstance;
 
   constructor(baseURL: string = '') {
     this.axiosInstance = axios.create({ baseURL });
@@ -107,217 +174,403 @@ class ${serviceName}Service {
 ${methodsCode}
 }`,
       methodWrapper: (rpc) => `
-  async ${rpc.name}(request: Types.${rpc.request}): Promise<Types.${rpc.resp}> {
-    const { path, method } = rpc;
-    const response = await this.axiosInstance[method.toLowerCase()](path, request);
-    return response.data;
-  }`
+async ${rpc.name}(request: Types.${rpc.request}): Promise<Types.${rpc.resp}> {
+  const { data } = await this.axiosInstance['${rpc.method.toLowerCase()}'](
+    '${rpc.path}',
+    request
+  );
+  return data;
+}`
     }
   }
 })
 ```
 
-### 3. Example Usage
+### Using Function Mode
 
-Assuming you have a `.proto` file:
+If you prefer a functional programming style:
+
+```typescript
+export default defineConfig({
+  proto: {
+    root: './proto',
+  },
+  output: {
+    dir: './src/api',
+    generationType: 'function',
+    functionTemplate: {
+      functionWrapper: (rpc) => `
+export async function ${rpc.name}(baseUrl: string = '', request: Types.${rpc.request}): Promise<Types.${rpc.resp}> {
+  const response = await fetch(\`\${baseUrl}${rpc.path}\`, {
+    method: '${rpc.method.toUpperCase()}',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    throw new Error(\`${rpc.name} failed: \${response.statusText}\`);
+  }
+
+  return response.json();
+}`
+    }
+  }
+})
+```
+
+Generated code:
+
+```typescript
+// Using function mode
+import { GetUser, CreateUser, Types } from './src/api/UserService/UserService.index'
+
+const user = await GetUser('https://api.example.com', { user_id: '123' })
+```
+
+## Customizing Specific Methods
+
+If you need to customize implementation for a specific API method (for example, file upload):
+
+```typescript
+export default defineConfig({
+  proto: {
+    root: './proto',
+  },
+  output: {
+    dir: './src/api',
+    funcCalls: {
+      // Custom implementation for UploadFile method
+      'UploadFile': (rpc) => `
+async UploadFile(file: File): Promise<Types.UploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(\`\${this.baseUrl}${rpc.path}\`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  return response.json();
+}`
+    }
+  }
+})
+```
+
+## Supported Proto Features
+
+pb2ts fully supports the following Proto features:
+
+| Feature | Support | TypeScript Mapping |
+|---------|---------|-------------------|
+| Basic Types | ✅ | int32 → number, int64 → string, bool → boolean, string → string, bytes → Uint8Array |
+| Timestamp | ✅ | `string` (ISO 8601 format) |
+| Enums | ✅ | TypeScript enum |
+| Nested Messages | ✅ | Interface or type alias |
+| Map Types | ✅ | `Record<KeyType, ValueType>` |
+| Repeated Fields | ✅ | `Type[]` |
+| HTTP Annotations | ✅ | GET, POST, PUT, DELETE, PATCH |
+| Comment Preservation | ✅ | JSDoc format comments |
+
+### Complex Type Example
 
 ```protobuf
-syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
-import "google/api/annotations.proto";
-
-package example;
-
-message GetUserRequest {
-  string user_id = 1;
-}
-
-message User {
-  string id = 1;
+message ComplexMessage {
+  int32 id = 1;
   string name = 2;
+  Priority priority = 3;           // Enum
+  repeated string tags = 4;          // Array
+  map<string, int32> metadata = 5;  // Map
+  SubMessage sub = 6;                // Nested message
+  google.protobuf.Timestamp created_at = 7;  // Timestamp
+  google.protobuf.Timestamp updated_at = 8;  // Timestamp
 }
 
-service UserService {
-  rpc GetUser(GetUserRequest) returns (User) {
-    option (google.api.http) = {
-      get: "/v1/users/{user_id}"
-    };
-  }
+enum Priority {
+  LOW = 0;
+  MEDIUM = 1;
+  HIGH = 2;
+}
+
+message SubMessage {
+  string description = 1;
+  bool completed = 2;
 }
 ```
 
-After running `pb2ts gen`, it will generate TypeScript code similar to (using default fetch configuration):
+Generated TypeScript code:
 
-```ts
-// ./api/UserService/UserService.types.ts
-/**
- * ⚠️ AUTO-GENERATED CODE - DO NOT EDIT
- *
- * This file is automatically generated from Protocol Buffer definitions.
- * Any manual changes will be overwritten on the next generation.
- *
- * Generated at: 2023-01-01T00:00:00.000Z
- */
-
-export interface GetUserRequest {
-  user_id: string;
+```typescript
+export enum Priority {
+  LOW = 0,
+  MEDIUM = 1,
+  HIGH = 2,
 }
 
-export interface User {
-  id: string;
+export interface SubMessage {
+  description: string;
+  completed: boolean;
+}
+
+export interface ComplexMessage {
+  id: number;
   name: string;
+  priority: Priority;
+  tags: string[];
+  metadata: Record<string, number>;
+  sub: SubMessage;
+  created_at: string;  // ISO 8601 format timestamp, e.g., "2024-01-15T10:30:00Z"
+  updated_at: string;  // ISO 8601 format timestamp, e.g., "2024-01-15T10:30:00Z"
 }
+```
 
-// ./api/UserService/UserService.index.ts
-/**
- * ⚠️ AUTO-GENERATED CODE - DO NOT EDIT
- *
- * This file is automatically generated from Protocol Buffer definitions.
- * Any manual changes will be overwritten on the next generation.
- *
- * Generated at: 2023-01-01T00:00:00.000Z
- */
-import * as Types from './UserService.types';
+> **Note**: The `google.protobuf.Timestamp` type is mapped to `string`, using ISO 8601 standard time format (e.g., `"2024-01-15T10:30:00.000Z"`). This is a common way to handle time in JavaScript, which can be easily parsed using `new Date()` or processed with libraries like dayjs/momentjs.
 
-export { Types };
+## Extending Generated Code
 
-/**
- * Service class for UserService
- */
-export class UserServiceService {
-  private baseUrl: string;
+Each service generates an `extensions.ts` file for custom extensions:
 
-  constructor(baseUrl: string = '') {
-    this.baseUrl = baseUrl;
+```typescript
+// UserService.extensions.ts
+import { UserServiceService, Types } from './UserService.index'
+
+export class ExtendedUserService extends UserServiceService {
+  // Add custom methods
+  async getUserWithCache(userId: string): Promise<Types.User> {
+    // Implement caching logic
+    return this.GetUser({ user_id: userId })
   }
 
-  async GetUser(request: Types.GetUserRequest): Promise<Types.User> {
-    const response = await fetch(`${this.baseUrl}/v1/users/${request.user_id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request),
-    });
+  // Override existing methods
+  async CreateUser(request: Types.CreateUserRequest): Promise<Types.User> {
+    // Add logging
+    console.log('Creating user:', request.name)
+    return super.CreateUser(request)
+  }
+}
+```
 
-    if (!response.ok) {
-      throw new Error(`GetUser failed: ${response.statusText}`);
-    }
+**Note**: The `extensions.ts` file is only created on first generation and will not be overwritten afterwards, so you can safely add custom code.
 
-    return response.json();
+## CLI Commands
+
+### Generate Code
+
+```bash
+pb2ts gen --proto <proto-dir> --out <output-dir>
+```
+
+**Parameters**:
+- `--proto <dir>`: Proto file root directory (default: `./`)
+- `--out <dir>`: Output directory (default: `./api`)
+- `-c, --config <file>`: Specify configuration file (default: `pb2ts.config.ts`)
+
+**Examples**:
+
+```bash
+# Use default configuration
+pb2ts gen
+
+# Specify directories
+pb2ts gen --proto ./proto --out ./src/api
+
+# Use custom configuration file
+pb2ts gen --config ./config/pb2ts.config.ts
+```
+
+### Configuration Priority
+
+Configuration priority from high to low is:
+
+1. **CLI command line arguments** (highest priority)
+2. **Configuration file** (`pb2ts.config.ts`)
+3. **Default configuration** (lowest priority)
+
+For example:
+
+```bash
+# CLI parameters override settings in configuration file
+pb2ts gen --proto ./custom-proto --out ./custom-output
+```
+
+## How It Works
+
+```
+┌─────────────────┐
+│   .proto Files   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Go Parser      │  High-performance parsing of Proto files
+│  (Binary Component) │  Extract services, messages, enums, etc.
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  TypeScript     │  Based on configuration and templates
+│  Code Generator │  Generate types and client code
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Generated Code │
+│  .types.ts      │  Type definitions
+│  .index.ts      │  Client implementation
+│  .extensions.ts │  Extension file
+└─────────────────┘
+```
+
+## FAQ
+
+### Q: Will generated code overwrite my modifications?
+
+A: `ServiceName.types.ts` and `ServiceName.index.ts` will be completely overwritten on each generation. If you need custom code, add it in the `ServiceName.extensions.ts` file, which is only created on first generation and won't be overwritten.
+
+### Q: How to handle multiple Proto files?
+
+A: Just place all `.proto` files in the same directory, pb2ts will automatically scan and process all files. If you need to exclude certain files, use the `exclude` option in configuration.
+
+### Q: Does it support WebSocket or streaming RPC?
+
+A: Current version does not support streaming RPC and WebSocket. We recommend using traditional HTTP requests.
+
+### Q: Why is int64 type mapped to string in generated code?
+
+A: The `number` type in JavaScript cannot safely represent 64-bit integers, so `int64` and `uint64` types are mapped to `string` to ensure precision.
+
+### Q: How to use Timestamp type?
+
+A: `google.protobuf.Timestamp` is mapped to `string` type with ISO 8601 standard time format (e.g., `"2024-01-15T10:30:00.000Z"`). You can use JavaScript's native `Date` object or third-party libraries (like dayjs, momentjs) to handle it:
+
+```typescript
+// Parse timestamp
+const createdAt = new Date(user.created_at)
+console.log(createdAt.toLocaleString())
+
+// Using dayjs
+import dayjs from 'dayjs'
+const formattedTime = dayjs(user.updated_at).format('YYYY-MM-DD HH:mm:ss')
+```
+
+### Q: Can it be used in CI/CD?
+
+A: Absolutely! It's recommended to integrate the `pb2ts gen` command into the build process to ensure API client code stays synchronized with backend proto definitions.
+
+## Best Practices
+
+### 1. Version Control
+
+Include `pb2ts.config.ts` in version control to ensure team members use the same configuration.
+
+### 2. Automate Generation
+
+Add scripts in `package.json`:
+
+```json
+{
+  "scripts": {
+    "gen:api": "pb2ts gen",
+    "dev": "npm run gen:api && vite dev",
+    "build": "npm run gen:api && vite build"
+  }
+}
+```
+
+### 3. Directory Structure Recommendation
+
+```
+project/
+├── proto/                 # Proto file directory
+│   ├── user.proto
+│   └── product.proto
+├── src/
+│   └── api/              # Generated code directory
+│       ├── UserService/
+│       └── ProductService/
+├── pb2ts.config.ts       # Configuration file
+└── package.json
+```
+
+### 4. Type Export
+
+Create a unified entry file for easier imports:
+
+```typescript
+// src/api/index.ts
+export * from './UserService/UserService.index'
+export * from './ProductService/ProductService.index'
+```
+
+### 5. Error Handling
+
+Add unified error handling on top of generated code:
+
+```typescript
+// api/errorHandler.ts
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public data?: any
+  ) {
+    super(message)
   }
 }
 
-export { UserServiceService };
+export function handleApiError(error: any): never {
+  if (error instanceof ApiError) {
+    throw error
+  }
+  throw new ApiError('Network error or server error')
+}
+
+// Usage
+import { UserServiceService } from './api/UserService/UserService.index'
+import { handleApiError } from './api/errorHandler'
+
+const service = new UserServiceService('https://api.example.com')
+
+try {
+  const user = await service.GetUser({ user_id: '123' })
+} catch (error) {
+  handleApiError(error)
+}
 ```
-
-**Note**: A `UserService.extensions.ts` file will also be generated for user custom extensions. This file will not be overwritten after the first generation.
-
-## Configuration Options
-
-### Proto Configuration
-
-- `root`: Root directory for proto files (default: "./")
-- `include`: Patterns to include (default: ["**/*.proto"])
-- `exclude`: Patterns to exclude (default: ["node_modules", "dist"])
-
-### Output Configuration
-
-- `dir`: Output directory (default: "./api")
-- `generationType`: Generation type ('service' or 'function', default: 'service')
-- `imports`: Additional import statements
-- `funcCalls`: Custom call templates for specific RPC methods
-- `serviceTemplate`: Service class template configuration
-  - `classWrapper`: Class wrapper function
-  - `methodWrapper`: Method wrapper function
-  - `extensionWrapper`: Extension file template
-- `functionTemplate`: Function generation template configuration
-  - `functionWrapper`: Function wrapper function
-
-## Supported Protobuf Features
-
-- Message Definitions
-- Enum Definitions
-- Nested Messages and Enums
-- Map Types
-- Repeated Fields
-- `google.api.http` Annotations (GET, POST, PUT, DELETE, PATCH)
-- Basic Type Mapping (int32, string, bool, bytes, etc.)
-- Comment Preservation
-
-## Project Architecture
-
-### Tech Stack
-
-- **Go Language Parser**: `go_pb_parser` - High-performance Protocol Buffer parser
-- **TypeScript Generator**: `packages/pb2ts` - Code generation and CLI tool
-- **Build Tools**: pnpm, tsup
-- **Command Line Framework**: cac
-
-### Project Structure
-
-```
-pb2ts/
-├── go_pb_parser/              # Go language parser
-│   ├── cmd/                   # Command line entry point
-│   ├── internal/
-│   │   ├── parser/           # Core parsing logic
-│   │   └── types/            # Type definitions
-│   └── test_proto/           # Test proto files
-├── packages/pb2ts/            # TypeScript package
-│   ├── src/
-│   │   ├── cli/              # Command-line interface
-│   │   ├── config/           # Configuration system
-│   │   ├── generator/        # Code generator
-│   │   └── parser/           # Parser interfaces
-├── bin/                      # Compiled binary files
-├── scripts/                  # Build scripts
-└── test/                     # Test files
-```
-
-### Go Parser
-
-The Go parser is responsible for parsing `.proto` files and extracting service definitions, messages, enums, and other information. It uses the `github.com/jhump/protoreflect` library to handle complex Protocol Buffer files and generates JSON-formatted parsing results for the TypeScript code generator to use.
-
-### TypeScript Generator
-
-The TypeScript generator receives data from the Go parser and generates corresponding TypeScript code according to the configuration. It supports two generation modes:
-- **Service Mode**: Generates service classes with static methods
-- **Function Mode**: Generates standalone functions
 
 ## Development
 
-### Prerequisites
-
-- Node.js >= 18
-- pnpm
-- Go >= 1.19
-
-### Building
+### Local Development
 
 ```bash
+# Clone repository
+git clone https://github.com/adminck/pb2ts.git
+cd pb2ts
+
 # Install dependencies
 pnpm install
 
-# Build Go parser
-go build -o bin/pb2ts-parser ./go_pb_parser/cmd/main.go
-
-# Build TypeScript package
+# Build
 pnpm run build
 
 # Development mode
 pnpm run dev
 ```
 
-### Testing
+### Build Go Parser
 
 ```bash
-# Run Go unit tests
-cd go_pb_parser && go test ./...
-
-# Run code generation tests
-pnpm run test:gen
+cd go_pb_parser
+go build -o ../../bin/pb2ts-parser ./cmd/main.go
 ```
 
-### Contributing
+## License
+
+MulanPSL2 (Mulan Permissive Software License v2)
+
+## Contributing
 
 We welcome community contributions! Please follow these steps:
 
@@ -325,22 +578,10 @@ We welcome community contributions! Please follow these steps:
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+5. Create a Pull Request
 
-## Frequently Asked Questions
+## Related Links
 
-### Q: How do I customize the generated code templates?
-
-A: Customize code templates by defining `serviceTemplate` or `functionTemplate` in the configuration file.
-
-### Q: Which HTTP methods are supported?
-
-A: Supports all `google.api.http` annotated methods including GET, POST, PUT, DELETE, PATCH.
-
-### Q: How are nested message types handled?
-
-A: The generator automatically handles nested message types and properly declares them in the type files.
-
-## License
-
-MulanPSL2 (Mulan Permissive Software License v2)
+- [GitHub Repository](https://github.com/adminck/pb2ts)
+- [Issue Tracker](https://github.com/adminck/pb2ts/issues)
+- [npm Package](https://www.npmjs.com/package/@adminck/pb2ts)

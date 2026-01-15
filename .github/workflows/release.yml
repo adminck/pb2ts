@@ -16,6 +16,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Extract version from tag
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Update package.json version
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          node -e "
+            const pkg = require('./packages/pb2ts/package.json');
+            pkg.version = '$VERSION';
+            const fs = require('fs');
+            fs.writeFileSync('./packages/pb2ts/package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "Updated package.json version to $VERSION"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

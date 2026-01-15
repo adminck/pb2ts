@@ -35,6 +35,30 @@ if (fs.existsSync(postinstallSource)) {
   console.log('[pb2ts] ✓ postinstall.js copied')
 }
 
+// 复制 README.md（中文版）并添加语言切换
+const readmeSource = path.join(root, 'README.md')
+const readmeTarget = path.join(packageDir, 'README.md')
+if (fs.existsSync(readmeSource)) {
+  let readmeContent = fs.readFileSync(readmeSource, 'utf-8')
+  // 在开头添加语言切换链接
+  const languageToggle = '\n---\n**[English](./README_EN.md)** | 中文\n---\n\n'
+  readmeContent = languageToggle + readmeContent
+  fs.writeFileSync(readmeTarget, readmeContent)
+  console.log('[pb2ts] ✓ README.md copied')
+}
+
+// 复制 README_EN.md（英文版）并添加语言切换
+const readmeEnSource = path.join(root, 'README_EN.md')
+const readmeEnTarget = path.join(packageDir, 'README_EN.md')
+if (fs.existsSync(readmeEnSource)) {
+  let readmeEnContent = fs.readFileSync(readmeEnSource, 'utf-8')
+  // 在开头添加语言切换链接
+  const languageToggleEn = '\n---\nEnglish | **[中文](./README.md)**\n---\n\n'
+  readmeEnContent = languageToggleEn + readmeEnContent
+  fs.writeFileSync(readmeEnTarget, readmeEnContent)
+  console.log('[pb2ts] ✓ README_EN.md copied')
+}
+
 console.log('[pb2ts] ✓ Package prepared for publish')
 
 function copyDir(src, dest) {
