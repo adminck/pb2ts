@@ -2,8 +2,9 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import type { ParseResult } from './types'
+import type {Pb2tsConfig} from "../config/types";
 
-export async function runParser(protoPath: string, includePaths: string[] = []): Promise<ParseResult> {
+export async function runParser(config: Pb2tsConfig): Promise<ParseResult> {
     const packageRoot = path.resolve(__dirname, '..', '..')
 
     const possiblePaths = [
@@ -32,9 +33,13 @@ export async function runParser(protoPath: string, includePaths: string[] = []):
         throw new Error('Could not find pb2ts-parser binary')
     }
 
-    const args = ['--proto', protoPath]
-    if (includePaths.length > 0) {
-        args.push('--imports', includePaths.join(','))
+    const args = ['--proto', config.proto.root]
+    if (config.proto.include.length > 0) {
+        args.push('--imports', config.proto.include.join(','))
+    }
+
+    if (config.proto.exclude.length > 0) {
+        args.push('--exclude', config.proto.exclude.join(','))
     }
 
     return new Promise((resolve, reject) => {

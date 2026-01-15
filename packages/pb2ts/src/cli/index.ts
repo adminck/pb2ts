@@ -19,7 +19,11 @@ cli
             console.log(pc.cyan(`\n  pb2ts v${version}\n`))
 
             const overrides = {
-                proto: options.proto ? { root: options.proto } : undefined,
+                proto: options.proto ? { 
+                    root: options.proto,
+                    include: [],
+                    exclude: []
+                } : undefined,
                 output: options.out ? { dir: options.out } : undefined,
             }
 

@@ -10,12 +10,12 @@ export interface ProtoConfig {
      * Glob patterns to include
      * @default ["**\/*.proto"]
      */
-    include?: string[]
+    include: string[]
     /**
      * Glob patterns to exclude
      * @default ["node_modules", "dist"]
      */
-    exclude?: string[]
+    exclude: string[]
 }
 
 type funcCall = (name: RPC) => string

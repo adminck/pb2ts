@@ -50,12 +50,12 @@ interface ProtoConfig {
      * Glob patterns to include
      * @default ["**\/*.proto"]
      */
-    include?: string[];
+    include: string[];
     /**
      * Glob patterns to exclude
      * @default ["node_modules", "dist"]
      */
-    exclude?: string[];
+    exclude: string[];
 }
 type funcCall = (name: RPC) => string;
 interface OutputConfig {
@@ -83,6 +83,6 @@ declare function defineConfig(config: Pb2tsConfig): Pb2tsConfig;
 
 declare function generate(config: Pb2tsConfig): Promise<void>;
 
-declare function runParser(protoPath: string, includePaths?: string[]): Promise<ParseResult>;
+declare function runParser(config: Pb2tsConfig): Promise<ParseResult>;
 
 export { type Enum, type EnumItem, type Field, type Message, type OutputConfig, type ParseResult, type Pb2tsConfig, type ProtoConfig, type RPC, type Service, defineConfig, generate, runParser };
