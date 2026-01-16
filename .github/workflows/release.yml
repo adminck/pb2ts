@@ -41,13 +41,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 9
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Prepare package for publish
-        run: node scripts/prepare-publish.js
+        run: node scripts/prepare-publish.cjs
 
       - name: Build package
         run: pnpm run build
