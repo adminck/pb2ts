@@ -44,12 +44,14 @@ jobs:
           version: 9
 
       - name: Install dependencies
+        working-directory: packages/pb2ts
         run: pnpm install
 
       - name: Prepare package for publish
         run: node scripts/prepare-publish.cjs
 
       - name: Build package
+        working-directory: packages/pb2ts
         run: pnpm run build
 
       - name: Publish to npm
