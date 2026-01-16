@@ -10,7 +10,7 @@
 
 1. **编译所有平台的 Go 二进制文件**：
    ```bash
-   node scripts/build-all-platforms.js
+   node scripts/build-all-platforms.cjs
    ```
 
 2. **提交代码到仓库**：
