@@ -29,7 +29,7 @@
     "build:parser:all": "node ../../scripts/build-all-platforms.cjs",
     "prepare:publish": "node ../../scripts/prepare-publish.cjs",
     "prepublishOnly": "npm run build && npm run build:parser:all && npm run prepare:publish",
-    "postinstall": "node ../../scripts/postinstall.cjs",
+    "postinstall": "node scripts/postinstall.cjs",
     "test:gen": "node ./dist/cli/index.js gen --proto ../../test/test_proto --out ./test/api"
   },
   "dependencies": {

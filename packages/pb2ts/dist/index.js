@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// node_modules/tsup/assets/esm_shims.js
+// ../../node_modules/.pnpm/tsup@8.5.1_jiti@1.21.7_typescript@5.9.3/node_modules/tsup/assets/esm_shims.js
 import path from "path";
 import { fileURLToPath } from "url";
 var getFilename = () => fileURLToPath(import.meta.url);
