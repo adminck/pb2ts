@@ -14,7 +14,6 @@ function initializePaths() {
   const goRoot = path.join(root, 'go_pb_parser')
   const readmeSource = path.join(root, 'README.md')
   const readmeEnSource = path.join(root, 'README_EN.md')
-  const postinstall = path.join(scriptsDir, 'postinstall.cjs')
   const LICENSE = path.join(root, 'LICENSE')
 
   return {
@@ -25,7 +24,6 @@ function initializePaths() {
     goRoot,
     readmeSource,
 	readmeEnSource,
-	postinstall,
     LICENSE
   }
 }
@@ -109,12 +107,11 @@ function packagePb2ts(paths) {
  * 将 需要打包的文件复制到包根目录
  */
 function copyDirFiles(paths) {
-    const {packageDir, binDir, readmeSource, readmeEnSource, postinstall, LICENSE} = paths
+    const {packageDir, binDir, readmeSource, readmeEnSource, LICENSE} = paths
     const items = [
       { src: binDir, isDir: true },
       { src: readmeSource, isDir: false },
       { src: readmeEnSource, isDir: false },
-      { src: postinstall, isDir: false },
       { src: LICENSE, isDir: false },
     ]
 
